@@ -1,0 +1,60 @@
+import java.math.BigInteger;
+import java.util.*;
+
+public class Main {
+
+    static BigInteger toDecimal(String value, int base) {
+        return new BigInteger(value, base);
+    }
+
+    public static void main(String[] args) {
+ 
+        String jsonStr = """
+        {
+            "keys": {
+                "n": 4,
+                "k": 3
+            },
+            "1": {"base": "10", "value": "4"},
+            "2": {"base": "2", "value": "111"},
+            "3": {"base": "10", "value": "12"},
+            "6": {"base": "4", "value": "213"}
+        }
+        """;
+
+
+        int n = Integer.parseInt(jsonStr.split("\"n\":")[1].split(",")[0].trim());
+        int k = Integer.parseInt(jsonStr.split("\"k\":")[1].split("}")[0].trim());
+
+        List<BigInteger> roots = new ArrayList<>();
+        String[] parts = jsonStr.split("\\},");
+        int count = 0;
+
+        for (String part : parts) {
+            if (part.contains("\"base\"") && part.contains("\"value\"")) {
+                String baseStr = part.split("\"base\":")[1].split(",")[0].replaceAll("[^0-9]", "");
+                String valueStr = part.split("\"value\":")[1].split("[}\\\"]")[1].trim();
+
+                int base = Integer.parseInt(baseStr);
+                BigInteger root = toDecimal(valueStr, base);
+                roots.add(root);
+
+                count++;
+                if (count == k) break; 
+            }
+        }
+
+
+        BigInteger constant = BigInteger.ONE;
+        for (BigInteger r : roots) {
+            constant = constant.multiply(r);
+        }
+
+        // Apply (-1)^k
+        if (k % 2 != 0) {
+            constant = constant.negate();
+        }
+
+        System.out.println(constant);
+    }
+}
